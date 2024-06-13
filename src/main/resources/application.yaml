@@ -1,0 +1,23 @@
+server:
+  port: 8080
+logging:
+  level:
+    root: INFO
+spring:
+  application:
+    name: RaboBankDemo
+  datasource:
+    url: jdbc:h2:mem:demodb
+    username: sa
+    password: password 
+    driverClassName: org.h2.Driver
+  h2:
+    console.enabled: true
+  main:
+    allow-circular-references: true
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: true  
+    hibernate:
+#      ddl-auto: update
+      ddl-auto: create-drop

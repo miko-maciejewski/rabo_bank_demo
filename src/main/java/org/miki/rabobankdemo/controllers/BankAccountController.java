@@ -71,6 +71,10 @@ public class BankAccountController {
 		// read accounts and map to account DTO
 		try {
 			accountList = accountService.findAccountsForUser(userID);
+		} catch (UserNotFoundException une) {
+            // If user not exists
+            log.error("User with id {} does not exists - account not created.",  userID);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not exists. Cash withdraw failed", une);			
 		} catch (Exception e) {
 			// any other exception
 			log.error("Error while retrive user list for user id = {}",  userID, e);
@@ -94,7 +98,7 @@ public class BankAccountController {
 
 		} catch (AccountNotFoundException anf) {
 			log.debug("Account with id = {} not found",  accountID, anf);
-			throw new ResponseStatusException(HttpStatus.NO_CONTENT, "Account not found while search", anf);
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found while search", anf);
 
 		} catch (Exception e) {
 			// any other exception
@@ -115,6 +119,10 @@ public class BankAccountController {
 	  try {
 		  BankAccount newBankAccount = accountService.createAccount(bankAccountData.userId(),bankAccountData.currencyCode(), bankAccountData.initalAmount());
 		  return baAccount2dtoMapper.apply(newBankAccount);
+		} catch (UserNotFoundException une) {
+            // If user not exists
+            log.debug("User with id {} does not exists - account not created.",  bankAccountData.userId());
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not exists. Account creation failed for user id=" + bankAccountData.userId(), une);					  
 		} catch (Exception e) {
 			// any other exception
 			log.error("Internal server error while account creation for {}",  bankAccountData, e);
@@ -140,7 +148,7 @@ public class BankAccountController {
 		} catch (UserNotFoundException une) {
             // If user not exists
             log.error("User with id {} does not exists", transferData.userId());
-            throw new ResponseStatusException(HttpStatus.FAILED_DEPENDENCY, "User not exists. Transfer failed", une);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not exists. Transfer failed", une);
         } catch (WrongParmeterValue wpe) {
             // If user not exists
             log.error("Wrong paramerers for cash transfer {}", transferData);
@@ -170,7 +178,7 @@ public class BankAccountController {
 		} catch (UserNotFoundException une) {
             // If user not exists
             log.error("User with id {} does not exists", transferData.userId());
-            throw new ResponseStatusException(HttpStatus.FAILED_DEPENDENCY, "User not exists. Transfer failed", une);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not exists. Transfer failed", une);
         } catch (WrongParmeterValue wpe) {
             // If user not exists
             log.error("Wrong paramerers for transfer {}", transferData);
@@ -198,7 +206,7 @@ public class BankAccountController {
 			} catch (UserNotFoundException une) {
 	            // If user not exists
 	            log.error("User with id {} does not exists", withdrawCashData.userId());
-	            throw new ResponseStatusException(HttpStatus.FAILED_DEPENDENCY, "User not exists. Cash withdraw failed", une);
+	            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not exists. Cash withdraw failed", une);
 	        } catch (WrongParmeterValue wpe) {
 	            // If user not exists
 	            log.error("Wrong paramerers for cash transfer {}, Problem: {}", withdrawCashData, wpe.getMessage());

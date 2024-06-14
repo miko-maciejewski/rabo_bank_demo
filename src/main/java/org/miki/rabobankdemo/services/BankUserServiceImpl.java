@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.hibernate.mapping.Collection;
 import org.miki.rabobankdemo.dto.BankAccountDTO;
 import org.miki.rabobankdemo.dto.BankUserDTO;
 import org.miki.rabobankdemo.dto.CreateBankUserDTO;
@@ -24,8 +25,8 @@ import org.springframework.web.server.ResponseStatusException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
-@Service
 @Slf4j
+@Service
 public class BankUserServiceImpl implements BankUserService {
 	
 	@Autowired
@@ -81,11 +82,10 @@ public class BankUserServiceImpl implements BankUserService {
 										Collections.emptyList() 
 									);
 
-		// store user
-		BankUser savedUserDB = userRepository.save(newUserDB);
 		
 		// generate UUID in place of IBAN to short implementation of demo :)
 		UUID uuid_iban = UUID.randomUUID();
+
 		
 		// create inital bank account 
 		BankAccount newBankAccount = new BankAccount(null,
@@ -94,11 +94,18 @@ public class BankUserServiceImpl implements BankUserService {
 										uuid_iban.toString(),
 										newUser.currencyCode(), 
 										newUser.balance(), 
-										savedUserDB,
+										newUserDB,
 										Collections.emptyList());
+		
+		// store user
+		BankUser savedUserDB = userRepository.save(newUserDB);
 
 		// and save it to DB with relation 
-		accountService.createAccount(newBankAccount);
+		BankAccount savedBankAccount = accountService.createAccount(newBankAccount);
+		
+		savedUserDB.setBankAccounts(List.of(savedBankAccount));
+
+		BankUser userWithAccount = userRepository.findById(savedUserDB.getId()).get();
 		
 		// return the new user
 		return savedUserDB;

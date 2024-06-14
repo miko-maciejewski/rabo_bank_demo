@@ -60,7 +60,6 @@ public class BankUser {
 	@NotNull
 	String password;
 	
-    @JsonIgnore
     @OneToMany(mappedBy="user", fetch = FetchType.LAZY)
     private List<BankAccount> bankAccounts;
     
